@@ -102,5 +102,5 @@ document.getElementById('quantity').value = 1
         localStorage.setItem(key, JSON.stringify(ligne_de_panier))
     }
 
-    alert("Le canapé est dans la boite !")
+    alert("Canapé ajouté au panier !")
  }
