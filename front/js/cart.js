@@ -9,6 +9,9 @@
 
 console.log(localStorage.length)
 
+let total_prix = 0
+let total_quantite = 0
+
 for (var i = 0; i < localStorage.length; i++){
     console.log(i)
     console.log(localStorage.key(i))
@@ -35,24 +38,26 @@ for (var i = 0; i < localStorage.length; i++){
         console.log(canape)
 
         let article = document.createElement('article')
-        article.className = 'cart_item'
-        article.id = identifiant
-        article.color = couleur_canape
+        article.className = 'cart__item'
+        article.dataset.id = identifiant
+        article.dataset.color = couleur_canape
     
         let div_1 = document.createElement('div')
-        div_1.className = 'cart_item_img'
+        div_1.className = 'cart__item__img'
         article.appendChild(div_1)
     
         let img = document.createElement('img')
-        img.src = img.imageUrl
-        img.alt = img.altTxt
+        img.src = canape.imageUrl
+        img.alt = canape.altTxt
         div_1.appendChild(img)
     
         let div_2 = document.createElement('div')
-        div_2.className = 'cart_item_content'
+        div_2.className = 'cart__item__content'
     
+        article.appendChild(div_2)
+
         let div_3 = document.createElement('div')
-        div_3.className = 'cart_item_content_description'
+        div_3.className = 'cart__item__content__description'
         div_2.appendChild(div_3)
     
         let titre_h2 = document.createElement('h2')
@@ -64,26 +69,32 @@ for (var i = 0; i < localStorage.length; i++){
         div_3.appendChild(p_1)
     
         let p_2 = document.createElement('p')
-        p_2.textContent = canape.price
+        p_2.textContent = canape.price + '€'
         div_3.appendChild(p_2)
     
         let div_4 = document.createElement('div')
-        div_4.className = 'cart_item_content_settings'
+        div_4.className = 'cart__item__content__settings'
     
+         div_2.appendChild(div_4)
+
         let div_5 = document.createElement('div')
-        div_5.className = 'cart_item_content_settings_quantity'
+        div_5.className = 'cart__item__content__settings__quantity'
         div_4.appendChild(div_5)
     
         let p_3 = document.createElement('p')
-        p_3.textContent = 'Qté : ' + quantity
+        p_3.textContent = 'Qté : '
         div_5.appendChild(p_3)
-
-        let value = canape.price
     
         let input = document.createElement('input')
         input.className = ('itemQuantity')
-        input.setAttribute = (value)
+        input.setAttribute('value', quantity)
+        input.setAttribute('name', 'itemQuantity')
+        input.setAttribute('min', 1)
+        input.setAttribute('max', 100)
+        input.setAttribute('type', 'number')
         div_5.appendChild(input)
+        
+        input.addEventListener('click', modifierQuantiteLigneDePanier)
 
         let div_6 = document.createElement('div')
         div_6.className = ('cart__item__content__settings__delete')
@@ -91,28 +102,100 @@ for (var i = 0; i < localStorage.length; i++){
 
         let p_4 = document.createElement('p')
         p_4.className=('deleteItem')
+        p_4.textContent = "Supprimer"
         div_6.appendChild(p_4)
+
+        document.getElementById("cart__items").appendChild(article)
+
+        p_4.addEventListener('click', supprimerLigneDePanier)
+
+        total_prix     = total_prix     + ligne_de_panier.quantite * canape.price   
+        total_quantite = total_quantite + ligne_de_panier.quantite
+
+        document.getElementById('totalQuantity').textContent = total_quantite
+        document.getElementById('totalPrice').textContent = total_prix
+
+        function supprimerLigneDePanier(event){   
+        
+        let key = identifiant + couleur_canape
+
+        event.target.closest('article').dataset.id
+        event.target.closest('article').dataset.color
+        console.log("OK !")
+
+        localStorage.removeItem(key)
+
+        article.remove
+
+        }
+
+   /**
+    * 1. Supprimer la ligne de panier depuis le localStorage
+    * 2. Supprimer l'élement article du document
+    * 3. Mettre à jour les total_prix et total_quantite
+    */
+
+        function modifierQuantiteLigneDePanier(_event){
+            
+            _event.target.closest('article').dataset.id
+            _event.target.closest('article').dataset.color
+
+            let key = identifiant + couleur_canape
+
+            let ligne_de_panier = JSON.parse(localStorage.getItem(key))
+
+            let quantiteFinale = _event.target.closest('input').value
+            quantiteFinale = parseInt(document.getElementsByClassName('itemQuantity')[0].value)
+            
+            if(quantiteFinale < 1 || quantiteFinale > 100)
+            {
+                alert("Veuillez saisir une quantité correcte")
+                return
+            }
+            else {
+            ligne_de_panier.quantite = quantiteFinale
+            localStorage.setItem(key, JSON.stringify(ligne_de_panier))
+            }
+
+             /*
+            * 1. Récupérer la ligne de panier dans le localStorage
+            * 2. Modifier la quantité
+            * 3. Sauvegarder les modifications dans le localStorage
+            * 4. Mettre à jour les totaux
+            */
+        }
+
+            /*
+            1. Récupérer et analyser données saisies par l'utilisateur dans le formulaire
+            2. Afficher un message d'erreur si besoin (par ex pour l'email)
+            3. Constituer un object Contact à partir des données du formulaire
+            4. Constituer un tableau de produits
+            */
+
+        function formulaire(utilisateur){
+
+            console.log(utilisateur)
+
+            let prenom = document.getElementById('firstName')
+            localStorage.setItem(key, (prenom))
+
+            let nom = document.getElementById('lastName')
+            localStorage.setItem(key, (nom))
+
+            let adresse = document.getElementById('address')
+            localStorage.setItem(key, (adresse))
+
+            let ville = document.getElementById('city')
+            localStorage.setItem(key, (ville))
+
+            let mail = document.getElementById('email')
+            localStorage.setItem(key, (mail))
+        }
+
 
      })
 
-     let total = 0
-
-     array.forEach(ligne_de_panier => {
-
-        let total_ligne = ligne_de_panier.quantite * canape.price
-        let total = total_ligne += total
-
-        return total
-     });
-
-     function calculTotal()
-     {
-
-        let quantite_totale = document.getElementById('totalQuantity')
-        let prix_total = document.getElementById('totalPrice')
-
-     }
-
 }
+
 
  
