@@ -7,26 +7,23 @@
  *  e/ Modification de la quantité d'une ligne du panier
  */
 
-console.log(localStorage.length)
-
-let total_prix = 0
-let total_quantite = 0
+//console.log(localStorage.length)
 
 for (var i = 0; i < localStorage.length; i++){
-    console.log(i)
-    console.log(localStorage.key(i))
+    //console.log(i)
+    //console.log(localStorage.key(i))
     let key = localStorage.key(i)
-    console.log(localStorage.getItem(key))
+    //console.log(localStorage.getItem(key))
     JSON.parse(localStorage.getItem(key))
-    console.log(JSON.parse(localStorage.getItem(key)))
+    //console.log(JSON.parse(localStorage.getItem(key)))
     let ligne_de_panier = JSON.parse(localStorage.getItem(key))
-    console.log(ligne_de_panier)
+    //console.log(ligne_de_panier)
     let couleur_canape = ligne_de_panier.couleur
-    console.log(couleur_canape)
+    //console.log(couleur_canape)
     let identifiant = ligne_de_panier.id
-    console.log(identifiant)
+    //console.log(identifiant)
     let quantity = ligne_de_panier.quantite
-    console.log("qty "+ quantity)
+    //console.log("qty "+ quantity)
 
     fetch('http://localhost:3000/api/products/' + identifiant)
     .then(function(response) {
@@ -108,94 +105,197 @@ for (var i = 0; i < localStorage.length; i++){
         document.getElementById("cart__items").appendChild(article)
 
         p_4.addEventListener('click', supprimerLigneDePanier)
-
-        total_prix     = total_prix     + ligne_de_panier.quantite * canape.price   
-        total_quantite = total_quantite + ligne_de_panier.quantite
-
-        document.getElementById('totalQuantity').textContent = total_quantite
-        document.getElementById('totalPrice').textContent = total_prix
-
-        function supprimerLigneDePanier(event){   
-        
-        let key = identifiant + couleur_canape
-
-        event.target.closest('article').dataset.id
-        event.target.closest('article').dataset.color
-        console.log("OK !")
-
-        localStorage.removeItem(key)
-
-        article.remove
-
-        }
-
-   /**
-    * 1. Supprimer la ligne de panier depuis le localStorage
-    * 2. Supprimer l'élement article du document
-    * 3. Mettre à jour les total_prix et total_quantite
-    */
-
-        function modifierQuantiteLigneDePanier(_event){
-            
-            _event.target.closest('article').dataset.id
-            _event.target.closest('article').dataset.color
-
-            let key = identifiant + couleur_canape
-
-            let ligne_de_panier = JSON.parse(localStorage.getItem(key))
-
-            let quantiteFinale = _event.target.closest('input').value
-            quantiteFinale = parseInt(document.getElementsByClassName('itemQuantity')[0].value)
-            
-            if(quantiteFinale < 1 || quantiteFinale > 100)
-            {
-                alert("Veuillez saisir une quantité correcte")
-                return
-            }
-            else {
-            ligne_de_panier.quantite = quantiteFinale
-            localStorage.setItem(key, JSON.stringify(ligne_de_panier))
-            }
-
-             /*
-            * 1. Récupérer la ligne de panier dans le localStorage
-            * 2. Modifier la quantité
-            * 3. Sauvegarder les modifications dans le localStorage
-            * 4. Mettre à jour les totaux
-            */
-        }
-
-            /*
-            1. Récupérer et analyser données saisies par l'utilisateur dans le formulaire
-            2. Afficher un message d'erreur si besoin (par ex pour l'email)
-            3. Constituer un object Contact à partir des données du formulaire
-            4. Constituer un tableau de produits
-            */
-
-        function formulaire(utilisateur){
-
-            console.log(utilisateur)
-
-            let prenom = document.getElementById('firstName')
-            localStorage.setItem(key, (prenom))
-
-            let nom = document.getElementById('lastName')
-            localStorage.setItem(key, (nom))
-
-            let adresse = document.getElementById('address')
-            localStorage.setItem(key, (adresse))
-
-            let ville = document.getElementById('city')
-            localStorage.setItem(key, (ville))
-
-            let mail = document.getElementById('email')
-            localStorage.setItem(key, (mail))
-        }
-
-
      })
+}
 
+MiseAJourTotaux()
+
+
+function modifierQuantiteLigneDePanier(_event){
+            
+    let identifiant = _event.target.closest('article').dataset.id
+    let couleur_canape = _event.target.closest('article').dataset.color
+
+    let key = identifiant + couleur_canape
+
+    let ligne_de_panier = JSON.parse(localStorage.getItem(key))
+
+    let quantiteFinale = parseInt(_event.target.value)
+    
+    if(quantiteFinale < 1 || quantiteFinale > 100)
+    {
+        alert("Veuillez saisir une quantité correcte")
+        return
+    }
+    else {
+        ligne_de_panier.quantite = quantiteFinale
+        localStorage.setItem(key, JSON.stringify(ligne_de_panier))
+        MiseAJourTotaux()
+    }
 }
 
 
+function supprimerLigneDePanier(event){   
+        
+    let article =  event.target.closest('article')
+    let identifiant = article.dataset.id
+    let couleur_canape = article.dataset.color
+    let key = identifiant + couleur_canape
+
+    
+    console.log("OK !")
+
+    localStorage.removeItem(key)
+
+    article.remove()
+    MiseAJourTotaux()
+}
+
+
+function MiseAJourTotaux()
+{
+    let total_prix = 0
+    let total_quantite = 0
+    for (var i = 0; i < localStorage.length; i++){
+        let key = localStorage.key(i)
+        let ligne_de_panier = JSON.parse(localStorage.getItem(key))
+        let identifiant = ligne_de_panier.id
+        fetch('http://localhost:3000/api/products/' + identifiant)
+        .then(function(response) {
+         if(response.ok) {
+             return response.json()
+            }
+        })
+        .then(function(canape) {
+            total_prix     = total_prix     + ligne_de_panier.quantite * canape.price   
+            total_quantite = total_quantite + ligne_de_panier.quantite
+    
+            document.getElementById('totalQuantity').textContent = total_quantite
+            document.getElementById('totalPrice').textContent = total_prix
+        })
+    }
+}
+
+
+
+let boutonCommander = document.getElementById('order')
+
+boutonCommander.addEventListener('click', passerCommande)
+
+function passerCommande(_event) {
+
+
+
+    /**
+     * GESTION DU BOUTON COMMANDER
+     * 1/ ajouter un event listener click sur le bouton
+     * 2/ sur le click, valider les informations du formulaire
+     *  a/ pour chaque champ du formulaire, utilisez une RegExp pour valider si le champ est OK ou pas
+     *  b/ si champ NOK, afficher un message d'erreur dans le <p> prevu a cet effet
+     *  c/ apres avoir vérifier tous les champs, si il y en 1 ou + en erreur, de pas aller plus loin (arreter la function)
+     *  d/ (bonus) Après erreurs, lorsque l'utilisateur commence a taper du texte, supprimer les messages d'erreur
+     *  e/ si tous les champs OK, appeler l'api /api/products/order
+     * contact: {
+        *   firstName: string,
+        *   lastName: string,
+        *   address: string,
+        *   city: string,
+        *   email: string
+        * }
+        * products: [string] <-- array of product _id
+     *  
+     * 
+     */
+
+    /**
+     * Regex email
+     * let regex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
+     * https://stackabuse.com/validate-email-addresses-with-regular-expressions-in-javascript/
+     * 
+     * if(regex.test(document.getElementById('email').value))
+     */
+    
  
+
+    let prenom = document.getElementById('firstName').value
+    let prenomRegex = new RegExp('[A-Z][A-Za-z\é\è\ê\-]+$');
+    let validationPrenom = prenomRegex.test(prenom);
+        if (prenom.match(prenomRegex)){
+            return true
+        } 
+        
+        else {
+            let messageErreur = document.getElementById('firstNameErrorMsg');
+            messageErreur.textContent = 'Prénom incorrect';
+            _event.preventDefault()
+        }
+
+    console.log(validationPrenom)
+    /**
+     * verifier si prenom est OK avec sa regexp, si NOK afficher le message d'erreur dans #firstNameErrorMsg
+     */
+
+    let nom = document.getElementById('lastName').value
+    let nomRegex = new RegExp('[A-Z][A-Za-z\é\è\ê\-]+$');
+    let validationNom = nomRegex.test(nom);
+    if (nom.match(nomRegex)){
+        return true
+    } 
+    
+    else {
+        let messageErreur = document.getElementById('lastNameErrorMsg');
+        messageErreur.textContent = 'Nom incorrect';
+        _event.preventDefault()
+    }
+
+    console.log(validationNom)
+
+
+    let adresse = document.getElementById('address').value
+    let adresseRegex = new RegExp('^[0-9]{1,3}(?:(?:[,. ]){1}[-a-zA-Zàâäéèêëïîôöùûüç]+)+');
+    let validationAdresse = adresseRegex.test(adresse);
+    if (adresse.match(adresseRegex)){
+        return true
+    } 
+    
+    else {
+        let messageErreur = document.getElementById('addressErrorMsg');
+        messageErreur.textContent = 'Adresse incorrecte';
+        _event.preventDefault()
+    }
+
+    console.log(validationAdresse)
+
+
+    let ville = document.getElementById('city').value
+    let villeRegex = new RegExp('[a-zA-Z]+(?:[\s-][a-zA-Z]+)*$');
+    let validationVille = villeRegex.test(ville);
+    if (ville.match(villeRegex)){
+        return true
+    } 
+    
+    else {
+        let messageErreur = document.getElementById('cityErrorMsg');
+        messageErreur.textContent = 'Ville incorrecte';
+        _event.preventDefault()
+    }
+
+    console.log(validationVille)
+
+
+    let mail = document.getElementById('email').value
+    let mailRegex = new RegExp('[a-z0-9]+@[a-z]+\.[a-z]{2,3}');
+    let validationMail = mailRegex.test(mail);
+    if (mail.match(mailRegex)){
+        return true
+    } 
+    
+    else {
+        let messageErreur = document.getElementById('emailErrorMsg');
+        messageErreur.textContent = 'Email incorrect';
+        _event.preventDefault()
+    }
+
+    console.log(validationMail)
+
+}
